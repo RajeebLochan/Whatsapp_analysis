@@ -706,7 +706,9 @@ if uploaded_file:
                     summary_text += content
                     summary_placeholder.markdown(f"**Summary:**\n\n{summary_text}")
         st.success("Summary complete.")
-
+        # Footer
+        st.markdown("---")
+        st.markdown("Made with ❤️ by Rajeeb")
 
 
 
