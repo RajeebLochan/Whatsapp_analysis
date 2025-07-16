@@ -1,0 +1,441 @@
+/* WhatsApp-inspired theme */
+:root {
+    --whatsapp-green: #25D366;
+    --whatsapp-light-green: #DCF8C6;
+    --whatsapp-dark-green: #128C7E;
+    --whatsapp-bg: #E5DDD5;
+    --whatsapp-dark-bg: #1F2C34;
+    --whatsapp-light-text: #F5F5F5;
+    --whatsapp-text: #333333;
+    --whatsapp-header: #075E54;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .main {
+        padding: 0.5rem !important;
+    }
+    
+    .hero-title {
+        font-size: 2rem !important;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem !important;
+    }
+    
+    .feature-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+    
+    .upload-steps {
+        flex-direction: column !important;
+    }
+    
+    .step {
+        margin-bottom: 1rem !important;
+    }
+    
+    .chart-container {
+        margin-bottom: 1rem !important;
+        padding: 0.5rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 1.5rem !important;
+    }
+    
+    .feature-card {
+        padding: 1rem !important;
+    }
+    
+    .upload-container {
+        padding: 1rem !important;
+    }
+}
+
+/* Landing Page Styles */
+.landing-hero {
+    background: linear-gradient(135deg, #075E54 0%, #128C7E 50%, #25D366 100%);
+    padding: 4rem 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.landing-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M30 30c0-11.046-8.954-20-20-20s-20 8.954-20 20 8.954 20 20 20 20-8.954 20-20zm0 0c0 11.046 8.954 20 20 20s20-8.954 20-20-8.954-20-20-20-20 8.954-20 20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.3;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    color: white;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.hero-subtitle {
+    font-size: 1.3rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 3rem;
+    font-weight: 300;
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.feature-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.feature-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.feature-card h3 {
+    color: white !important;
+    margin-bottom: 1rem !important;
+    font-size: 1.2rem !important;
+}
+
+.feature-card p {
+    color: rgba(255, 255, 255, 0.8) !important;
+    margin: 0 !important;
+    line-height: 1.5 !important;
+}
+
+/* Upload Section */
+.upload-section {
+    background: #253238 !important;
+    border-radius: 10px !important;
+    padding: 2rem !important;
+    margin-bottom: 2rem !important;
+    border: 1px solid rgba(37, 211, 102, 0.2) !important;
+}
+
+.upload-section h2 {
+    color: #25D366 !important;
+    margin-top: 0 !important;
+    margin-bottom: 1rem !important;
+}
+
+.upload-section p {
+    color: #F5F5F5 !important;
+    margin-bottom: 0 !important;
+}
+
+.upload-container h2 {
+    color: #25D366 !important;
+    text-align: center;
+    margin-bottom: 1rem !important;
+    font-size: 2.5rem !important;
+}
+
+.upload-container p {
+    color: #F5F5F5 !important;
+    text-align: center;
+    margin-bottom: 2rem !important;
+    font-size: 1.1rem !important;
+}
+
+.upload-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+    min-width: 200px;
+    margin: 0 1rem;
+}
+
+.step-number {
+    background: #25D366;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.step-text {
+    color: #F5F5F5;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Main container */
+
+
+/* Headers */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--whatsapp-green) !important;
+    font-weight: 600 !important;
+}
+
+/* File uploader */
+.stFileUploader > div {
+    background: #253238 !important;
+    border-radius: 10px !important;
+    border: 2px dashed var(--whatsapp-green) !important;
+    padding: 2rem !important;
+}
+
+.stFileUploader > div:hover {
+    border-color: var(--whatsapp-light-green) !important;
+}
+
+/* Buttons */
+.stButton > button {
+    background: linear-gradient(135deg, var(--whatsapp-green) 0%, var(--whatsapp-dark-green) 100%) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    border: none !important;
+    border-radius: 15px !important;
+    padding: 0.75rem 2rem !important;
+    box-shadow: 0 2px 10px rgba(37, 211, 102, 0.2) !important;
+}
+
+.stButton > button:hover {
+    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3) !important;
+}
+
+/* Metrics */
+.stMetric {
+    background: rgba(37, 211, 102, 0.1) !important;
+    border-radius: 10px !important;
+    padding: 1rem !important;
+    border-left: 3px solid var(--whatsapp-green) !important;
+}
+
+.stMetric > div {
+    color: var(--whatsapp-light-text) !important;
+}
+
+.stMetric label {
+    color: var(--whatsapp-green) !important;
+    font-weight: 600 !important;
+}
+
+/* Dataframes */
+.stDataFrame {
+    border-radius: 15px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+}
+
+.dataframe {
+    background-color: var(--whatsapp-dark-bg) !important;
+    color: var(--whatsapp-light-text) !important;
+    border: none !important;
+}
+
+.dataframe th {
+    background: linear-gradient(135deg, var(--whatsapp-green) 0%, var(--whatsapp-dark-green) 100%) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+}
+
+/* Enhanced Charts */
+.chart-container {
+    background: transparent !important;
+    border-radius: 10px !important;
+    padding: 1rem !important;
+    margin-bottom: 1.5rem !important;
+    border: 1px solid rgba(37, 211, 102, 0.2) !important;
+    box-shadow: none !important;
+}
+
+.chart-container:hover {
+    border-color: rgba(37, 211, 102, 0.4) !important;
+}
+
+/* Progress bar */
+.stProgress > div > div {
+    background: var(--whatsapp-green) !important;
+    border-radius: 5px !important;
+}
+
+/* Selectbox */
+.stSelectbox > div > div {
+    background: #253238 !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(37, 211, 102, 0.3) !important;
+    color: var(--whatsapp-light-text) !important;
+}
+
+.stSelectbox > div > div:hover {
+    border-color: var(--whatsapp-green) !important;
+}
+
+/* Info/Success boxes */
+.stInfo, .stSuccess {
+    background: #253238 !important;
+    color: var(--whatsapp-light-text) !important;
+    border-left: 4px solid var(--whatsapp-green) !important;
+    border-radius: 10px !important;
+    padding: 1rem !important;
+}
+
+/* WhatsApp header */
+.whatsapp-header {
+    background: linear-gradient(135deg, var(--whatsapp-header) 0%, var(--whatsapp-dark-green) 100%) !important;
+    color: white !important;
+    padding: 1.5rem !important;
+    border-radius: 15px !important;
+    margin-bottom: 2rem !important;
+    display: flex !important;
+    align-items: center !important;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2) !important;
+}
+
+.whatsapp-logo {
+    margin-right: 15px !important;
+    font-size: 2rem !important;
+}
+
+/* Section headers */
+.section-header {
+    background: #253238 !important;
+    padding: 1rem !important;
+    border-radius: 10px !important;
+    margin: 1.5rem 0 !important;
+    border: 1px solid rgba(37, 211, 102, 0.2) !important;
+}
+
+.section-header h3 {
+    color: #25D366 !important;
+    margin: 0 !important;
+    font-size: 1.3rem !important;
+}
+
+/* Footer */
+.footer {
+    background: linear-gradient(135deg, #075E54 0%, #128C7E 100%);
+    color: white;
+    padding: 3rem 2rem 2rem;
+    margin-top: 4rem;
+    border-radius: 20px 20px 0 0;
+    text-align: center;
+}
+
+.footer-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.footer h3 {
+    color: white !important;
+    margin-bottom: 1rem !important;
+    font-size: 1.8rem !important;
+}
+
+.footer p {
+    color: rgba(255, 255, 255, 0.8) !important;
+    margin-bottom: 2rem !important;
+    font-size: 1.1rem !important;
+}
+
+.social-links {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: white !important;
+    text-decoration: none !important;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.social-link:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.footer-divider {
+    border: none;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 2rem 0;
+}
+
+.footer-bottom {
+    color: rgba(255, 255, 255, 0.6) !important;
+    font-size: 0.9rem !important;
+    margin: 0 !important;
+}
+
+/* Style Plotly charts to match WhatsApp theme */
+.js-plotly-plot {
+    background: transparent !important;
+}
+
+.js-plotly-plot .plotly .main-svg {
+    background: transparent !important;
+}
+
+.js-plotly-plot .plotly .modebar {
+    background: rgba(37, 211, 102, 0.1) !important;
+    border-radius: 5px !important;
+}
+
+.js-plotly-plot .plotly .modebar-btn path {
+    fill: var(--whatsapp-green) !important;
+}

@@ -142,6 +142,8 @@ def message_per_month_user(selected_user, df):
     df['date'] = pd.to_datetime(df['date'])
     messages_per_month = df.groupby(df['date'].dt.to_period('M')).size().reset_index(name='messages')
     messages_per_month.columns = ['month', 'messages']
+    # Convert Period objects to strings for JSON serialization
+    messages_per_month['month'] = messages_per_month['month'].astype(str)
     return messages_per_month
 
 def message_per_year_user(selected_user, df):
@@ -212,7 +214,7 @@ def average_response_time(selected_user, df):
     
     # Calculate response time
     df['response_time'] = df['date'].diff().dt.total_seconds() / 60  # Convert to minutes
-    average_response = df['response_time'].median()
+    average_response = df['response_time'].mean()
     
     return average_response 
 
