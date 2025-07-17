@@ -1,4 +1,4 @@
-
+from wordcloud import WordCloud
 import streamlit as st
 import sqlite3
 import matplotlib.pyplot as plt
@@ -12,7 +12,7 @@ from helper import (
     average_response_time, preprocess_text
 )
 import plotly.express as px
-import plotly.graph_objects as go
+import plotly.graph_objects as go   
 import os
 from dotenv import load_dotenv
 from together import Together
@@ -1079,7 +1079,7 @@ if uploaded_file:
         </div>
         """, unsafe_allow_html=True)
         # Generate word cloud for each user
-        from wordcloud import WordCloud
+        
         def generate_wordcloud(text):
             wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
             return wordcloud
