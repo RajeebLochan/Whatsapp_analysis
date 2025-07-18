@@ -214,7 +214,7 @@ If you use this tool in your research or projects, please cite:
 @software{lochan2024whatsapp,
   title={WhatsApp Conversation Analyzer},
   author={Lochan, Rajeeb},
-  year={2024},
+  year={2025},
   url={https://github.com/RajeebLochan/Whatsapp_analysis}
 }
 ```
