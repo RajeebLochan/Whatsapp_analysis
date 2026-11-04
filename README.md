@@ -1,228 +1,215 @@
-# WhatsApp Conversation Analyzer
+# WhatsApp Chat Analyzer
 
-## Overview
+A Streamlit app that turns an exported WhatsApp chat into clear, well-defined
+statistics: who wrote how much, when the chat is active, conversation sessions,
+response-gap estimates, frequent words and emoji. Optional extras: message-level
+sentiment (local model) and a factual AI summary (Together AI, opt-in only).
 
-A comprehensive WhatsApp chat analysis tool that combines machine learning, data science, and generative AI to provide deep insights into your conversations. This project goes beyond traditional message statistics to analyze mood trends, communication patterns, user personas, and conversation dynamics using advanced NLP techniques.
+**Live demo:** [whatsapp-conversation-analyzer.streamlit.app](https://whatsapp-conversation-analyzer.streamlit.app/)
+(the hosted demo reflects whatever version its owner has deployed).
 
-**Live Demo**: [WhatsApp Conversation Analyzer](https://whatsapp-conversation-analyzer.streamlit.app/)
+## Privacy — read this first
+
+- **Processing happens on the server running the app.** If you use a hosted
+  copy, your file is uploaded to that server. It is *not* processed only in your
+  browser. Run it locally (below) if you do not want to upload your chat anywhere.
+- The app keeps the chat **in memory for your browser session only**. It does
+  not write chats, parsed data or summaries to disk or a database, and it does not
+  share them between users. **Clear chat and results** removes them from your
+  session immediately; they also disappear when the session ends.
+- The app's own logs contain only event types and counts, never message text,
+  names or prompts. Hosting providers (Streamlit Community Cloud, Azure, …) may keep
+  their own request/access logs.
+- **Nothing leaves the server unless you ask for an AI summary.** You see exactly
+  what will be sent, must tick a consent box for that exact content, and must
+  click **Generate AI summary**. The selected messages then go to Together AI
+  under its terms. Pseudonyms and masking of e-mails, phone numbers, links and
+  @mentions are on by default; they reduce exposure but **do not guarantee
+  anonymity**.
+- The optional sentiment model is downloaded from Hugging Face on first use; chat
+  text is classified locally and is not sent to Hugging Face.
+- Downloads contain aggregate statistics only (no message text) and are
+  protected against spreadsheet formula injection.
+
+Only analyse chats you are entitled to analyse, and respect the other
+participants' privacy.
 
 ## Features
 
-### Core Analytics
-- **Message Statistics**: Total messages, words, media shared, links shared
-- **User Activity Analysis**: Most active users, message frequency patterns
-- **Temporal Analysis**: Activity timelines, peak usage hours, monthly trends
-- **Content Analysis**: Word clouds, most common words, emoji usage patterns
+| Area | What you get |
+|---|---|
+| Parsing review | Detected format, date order (with explicit choice when DD/MM vs MM/DD is ambiguous), counts of text/media/deleted/system entries, skipped lines with line numbers, warnings |
+| Filters | Participants, date range and session idle gap; applied consistently to every metric, chart, download and AI input |
+| Overview | Messages, words, media placeholders, links, active days, calendar span, averages per active day and per calendar day, per-participant table |
+| Activity | Daily/weekly/monthly timeline (zero-filled, year-aware), weekday × hour heatmap, sessions and session starters, response-gap estimates, longest quiet periods |
+| Words & emoji | Top words (English stop words removed), word cloud, top emoji (compound emoji counted once) |
+| Sentiment (optional) | Negative/neutral/positive class shares per participant and month; polarity index explained |
+| AI summary (optional) | Topics, explicitly stated decisions, open questions, action items and stated uncertainty |
+| Download | ZIP of aggregate CSVs + Markdown report; optional pseudonymised names |
 
-### Advanced AI-Powered Insights
-- **Mood Trend Analysis**: Track emotional patterns over time using sentiment analysis
-- **Apology & Gratitude Detection**: Identify frequency of apologies and expressions of gratitude
-- **User Persona Analysis**: Generate personality profiles based on communication patterns
-- **Conversation Flow Analysis**: Understand dialogue dynamics and response patterns
-- **Topic Modeling**: Discover hidden themes and subjects in conversations
+### Metric definitions
 
-### Multi-Language Support
-- **Language Detection**: Automatically detect and analyze conversations in multiple languages
-- **Cross-Language Analytics**: Support for major languages including English, Hindi, Spanish, French, and more
-- **Unicode Emoji Analysis**: Comprehensive emoji sentiment and usage analysis
+- **Message**: a participant entry — text, media placeholder or deleted marker.
+  System events (joins, encryption notice, subject changes…) are counted separately.
+- **Word**: a whitespace-separated token in a text message that contains a letter or
+  digit; links are excluded.
+- **Active day**: a date with ≥1 message. **Calendar span**: first to last message
+  date, inclusive. Two averages are shown: per active day and per calendar day.
+- **Session**: messages with no gap longer than the chosen idle gap (default 1 hour).
+  The *session starter* sent the first message after an idle gap — a timing fact,
+  not a measure of effort or intent.
+- **Response-gap estimate**: time before a message whose sender differs from the
+  previous sender, within a session, computed on the full conversation before any
+  participant filter. In group chats the previous message is not necessarily the one
+  being answered.
+- **Quiet period**: a ≥24 h gap in the whole conversation. It says when the chat was
+  quiet, not who was responsible.
+- Times are shown as exported (the phone's local time). Exports contain no timezone,
+  and none is assumed.
 
-### Data Visualization
-- **Interactive Dashboards**: Built with Streamlit for seamless user experience
-- **Dynamic Charts**: Activity heatmaps, timeline visualizations, and statistical plots
-- **Word Clouds**: Customizable word frequency visualizations
-- **Emoji Analytics**: Visual emoji usage patterns and sentiment mapping
+## Supported export formats
 
-## Technical Architecture
+Export from WhatsApp via *chat → ⋮ / contact name → More → Export chat → Without
+media*. Upload the `.txt` file, or the `.zip` that iOS produces (the `_chat.txt`
+inside is read; size limits apply to the extracted text too).
 
-### Project Structure
+| Style | Example (synthetic) |
+|---|---|
+| Android, US 12-hour | `1/5/24, 9:01 PM - Alice: hi` (also with a narrow no-break space before PM) |
+| Android, 24-hour | `05/01/2024, 21:01 - Alice: hi` |
+| Dotted / ISO dates | `05.01.24, 21:01 - Alice: hi` · `2024-01-05, 21:01 - Alice: hi` |
+| iOS (bracketed, seconds) | `[05/01/2024, 21:01:07] Alice: hi` · `[1/5/24, 9:01:07 PM] Alice: hi` |
+
+Also handled: 2- or 4-digit years; `AM/PM`, `am/pm`, `a.m./p.m.`; optional
+seconds; BOMs and directional marks; multi-line messages; colons in messages; phone
+numbers and non-Latin names as senders; `<This message was edited>` markers; media
+placeholders (`<Media omitted>`, `image omitted`, `<attached: …>`, `… (file attached)`);
+deleted-message markers. System-event detection uses English phrases, so system
+lines from exports in other languages may be counted as ordinary text from a
+“sender”. Limits: 20 MB per file and 300,000 messages (the most recent are kept,
+with a warning).
+
+## Quick start
+
+Requires Python 3.11–3.13.
+
+```bash
+git clone https://github.com/RajeebLochan/Whatsapp_analysis.git
+cd Whatsapp_analysis
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+streamlit run app.py
 ```
-Whatsapp_analysis/
-├── app.py              # Streamlit application entrypoint
-├── preprocessor.py     # Chat file parsing and data preprocessing
-├── helper.py          # Statistical analysis, visualizations, and utility functions
-├── requirements.txt   # Python dependencies
-└── README.md         # Project documentation
+
+Open http://localhost:8501 and click **Try the synthetic sample chat** (invented
+data) or upload your own export.
+
+### Optional: sentiment analysis
+
+```bash
+pip install "torch>=2.13,<3" --index-url https://download.pytorch.org/whl/cpu   # CPU-only build, avoids CUDA wheels
+pip install -r requirements-ml.txt
 ```
 
-### Technology Stack
-- **Python 3.11**: Core programming language (strongly recommended)
-- **Streamlit**: Web application framework for interactive dashboards
-- **Pandas**: Data manipulation and analysis
-- **NumPy**: Numerical computing and array operations
-- **Matplotlib/Seaborn**: Data visualization libraries
-- **Plotly**: Interactive plotting and visualization
-- **NLTK/spaCy**: Natural language processing
-- **Scikit-learn**: Machine learning algorithms for pattern recognition
-- **Emoji**: Emoji analysis and sentiment mapping
-- **LangDetect**: Multi-language detection capabilities
+The first run downloads `cardiffnlp/twitter-xlm-roberta-base-sentiment` (~1.1 GB)
+into `~/.cache/huggingface`. The model card lists fine-tuning languages Arabic,
+English, French, German, Hindi, Italian, Spanish and Portuguese. This project has
+**not** evaluated its accuracy on WhatsApp chats; expect errors with informal
+language, sarcasm, romanised Hindi/Hinglish, Gujarati and code-mixed text. The app
+analyses at most the 3,000 most recent text messages of a selection per run.
 
-## Installation
+### Optional: AI summaries (Together AI)
 
-### Prerequisites
-- Python 3.11 or higher
-- pip package manager
+AI summaries are off until a user opts in. Two ways to provide a key:
 
-### Setup Instructions
+1. **Per user (default):** visitors paste their own Together API key; it is kept in
+   memory for that session only.
+2. **Shared deployment key:** set `TOGETHER_API_KEY` *and*
+   `WA_ENABLE_SHARED_AI_KEY=true`. Without the second flag a configured key is
+   ignored. Enable a shared key only when the deployment has access control and the
+   provider account has spending limits. `WA_AI_MAX_REQUESTS_PER_SESSION` (default 6)
+   is a per-session guard, not a spending control.
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/RajeebLochan/Whatsapp_analysis.git
-   cd Whatsapp_analysis
-   ```
+Settings are read from environment variables first, then Streamlit secrets — see
+`.env.example` and `.streamlit/secrets.toml.example` (placeholders only; never commit
+real values). The offered models come from `WA_TOGETHER_MODELS` (default
+`openai/gpt-oss-120b,openai/gpt-oss-20b`). Together's catalogue changes often (for
+example, `meta-llama/Llama-4-Scout-17B-16E-Instruct`, used previously, is listed as
+deprecated), so verify IDs against
+<https://docs.together.ai/docs/serverless/models> before deploying. Each summary uses
+at most 4 chunks of ~6,000 estimated input tokens (most recent messages first) plus
+one combining request, 1,200 output tokens per request, 10 s connect / 60 s read
+timeouts, a 180 s overall deadline and at most 2 retries for 429/5xx/network errors.
 
-2. **Create a virtual environment**:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
+The summary prompt asks only for explicitly stated topics, decisions, questions and
+action items, and for stated uncertainty. Chat text is passed as delimited,
+untrusted data and the model has no tools. This reduces, but cannot prevent, prompt
+injection. Output is shown as escaped plain text with links removed.
 
-3. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+## Project structure
 
-4. **Run the application**:
-   ```bash
-   streamlit run app.py
-   ```
+```
+app.py                     # Streamlit entry point (calls wa_analyzer.ui.main)
+wa_analyzer/
+  parsing.py               # export parser (replaces the former preprcosseing.py)
+  analytics.py             # statistics (pure, non-mutating)
+  text.py                  # words, links, emoji, stop words
+  sentiment.py             # optional, lazily loaded sentiment model
+  ai_summary.py            # opt-in Together AI summaries, redaction, safe rendering
+  export.py                # aggregate CSV/report downloads, CSV-injection protection
+  config.py                # limits and secret/setting loading
+  sample.py                # synthetic sample chat and generator
+  ui.py                    # Streamlit interface
+tests/                     # pytest + Streamlit AppTest; tests/browser = Playwright
+scripts/benchmark.py       # parsing/statistics benchmark on synthetic data
+.streamlit/config.toml     # upload limit, XSRF, error-detail and theme settings
+```
 
-## Usage Guide
+## Tests and checks
 
-### Exporting WhatsApp Chat Data
+```bash
+pip install -r requirements-dev.txt
+ruff check . && ruff format --check .
+python -m pytest -q --ignore=tests/browser        # offline: parser, analytics, AppTest UI, mocked AI/sentiment
+python -m playwright install chromium && python -m pytest -q tests/browser   # real-browser smoke test
+WA_RUN_REAL_MODEL=1 python -m pytest -q -m real_model                        # needs requirements-ml.txt + network
+pip-audit -r requirements.txt
+python scripts/benchmark.py
+```
 
-1. **For Individual Chats**:
-   - Open the chat in WhatsApp
-   - Tap on the contact name → More → Export Chat
-   - Choose "Without Media" for faster processing
-   - Save the .txt file
+All test data is synthetic. The default suite needs no network, no model download
+and no API key; the AI provider and sentiment model are replaced by fakes. See
+`VALIDATION_REPORT.md` for the latest results.
 
-2. **For Group Chats**:
-   - Open the group chat
-   - Tap on group name → More → Export Chat
-   - Choose "Without Media"
-   - Save the .txt file
+## Deployment notes
 
-### Using the Analyzer
+- **Streamlit Community Cloud:** entry point `app.py`; dependencies from
+  `requirements.txt` (core only, so sentiment is shown as unavailable unless you add
+  the ML extras); secrets via the app's *Secrets* settings.
+- **Azure App Service** (`.github/workflows/main_whatsappanalyze.yml`): the
+  workflow now runs tests before packaging and includes `.streamlit/config.toml`.
+  The App Service startup command must start Streamlit, e.g.
+  `python -m streamlit run app.py --server.port 8000 --server.address 0.0.0.0`.
+- Keep `server.enableXsrfProtection = true`. If uploads fail with HTTP 403 behind a
+  proxy or in Codespaces, fix the proxy/origin configuration rather than disabling
+  XSRF protection.
+- Each session holds its chat in memory; a 20 MB export can peak at roughly 400 MB of
+  Python heap while parsing (see `VALIDATION_REPORT.md`). Size the host or lower
+  the limits in `wa_analyzer/config.py` and `.streamlit/config.toml` accordingly.
 
-1. **Upload Chat File**: Use the file uploader to select your exported .txt file
-2. **Select Analysis Scope**: Choose between "Overall" analysis or specific user analysis
-3. **Explore Insights**: Navigate through different analysis sections:
-   - Statistical Overview
-   - Activity Patterns
-   - Content Analysis
-   - AI-Powered Insights
-   - Multi-Language Analytics
+## Security
 
-### Supported Chat Formats
-
-The analyzer supports WhatsApp chat exports in multiple date formats:
-- DD/MM/YYYY format
-- MM/DD/YYYY format
-- YYYY-MM-DD format
-- 12-hour and 24-hour time formats
-
-## Advanced Features
-
-### Machine Learning Capabilities
-- **Sentiment Analysis**: Tracks emotional tone using pre-trained models
-- **Topic Modeling**: Uses LDA (Latent Dirichlet Allocation) for theme discovery
-- **Clustering Analysis**: Groups similar conversation patterns
-- **Predictive Analytics**: Forecast communication trends
-
-### Generative AI Integration
-- **Conversation Summarization**: AI-generated summaries of chat themes
-- **Persona Generation**: Detailed personality profiles based on communication style
-- **Insight Generation**: Automated discovery of interesting conversation patterns
-- **Relationship Dynamics**: Analysis of interpersonal communication patterns
-
-### Privacy and Security
-- **Local Processing**: All data processing happens locally on your machine
-- **No Data Storage**: Chat data is not stored or transmitted to external servers
-- **Privacy First**: Your conversations remain completely private
-
-## Performance Optimizations
-
-- **Efficient Data Processing**: Optimized pandas operations for large chat files
-- **Memory Management**: Chunked processing for handling extensive chat histories
-- **Caching**: Streamlit caching for improved performance
-- **Parallel Processing**: Multi-threaded analysis for faster results
-
-## Contributing
-
-We welcome contributions to improve the WhatsApp Conversation Analyzer! Here's how you can help:
-
-1. **Fork the repository**
-2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
-3. **Make your changes**: Implement new features or fix bugs
-4. **Test thoroughly**: Ensure all functionality works as expected
-5. **Submit a pull request**: Describe your changes and their benefits
-
-### Development Guidelines
-- Follow PEP 8 style guidelines
-- Add comprehensive docstrings
-- Include unit tests for new features
-- Update documentation as needed
-
-## Roadmap
-
-### Upcoming Features
-- **Export Options**: PDF reports and data export functionality
-- **Advanced ML Models**: Custom-trained models for better accuracy
-- **Group Dynamics**: Enhanced group conversation analysis
-- **Integration APIs**: REST API for external applications
-
-### Version History
-- **v1.0**: Initial release with basic analytics
-- **v1.1**: Added multi-language support
-- **v1.2**: Integrated AI-powered insights
-- **v1.3**: Enhanced visualization capabilities
-
-## Troubleshooting
-
-### Common Issues
-- **File Upload Errors**: Ensure the file is a valid WhatsApp .txt export
-- **Memory Issues**: For large files, consider analyzing smaller date ranges
-- **Encoding Problems**: Ensure the chat file is UTF-8 encoded
-
-### Performance Tips
-- Use Python 3.11 for optimal performance
-- Close other applications to free up system memory
-- For very large chats, consider splitting the analysis by date ranges
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+See `AUDIT_REPORT.md` and `SECURITY_INCIDENT_RUNBOOK.md`. Earlier commits in this
+repository contained an API key and a database with uploaded chat content; the
+runbook lists the owner-only cleanup steps.
 
 ## Author
 
-**Rajeeb Lochan**
-- Twitter: [@rajeeb_thedev](https://x.com/rajeeb_thedev)
-- LinkedIn: [rajeeb-lochan](https://www.linkedin.com/in/rajeeb-lochan/)
-- GitHub: [@RajeebLochan](https://github.com/RajeebLochan)
+**Rajeeb Lochan Behera** —
+[GitHub](https://github.com/RajeebLochan) ·
+[LinkedIn](https://www.linkedin.com/in/rajeeb-lochan/) ·
+[X](https://x.com/rajeeb_thedev)
 
-## Acknowledgments
-
-- Thanks to the open-source community for providing excellent libraries
-- Special recognition to the Streamlit team for their amazing framework
-- Appreciation to all contributors and users who have provided feedback
-
-## Citation
-
-If you use this tool in your research or projects, please cite:
-
-```bibtex
-@software{lochan2024whatsapp,
-  title={WhatsApp Conversation Analyzer},
-  author={Lochan, Rajeeb},
-  year={2025},
-  url={https://github.com/RajeebLochan/Whatsapp_analysis}
-}
-```
-
----
-
-**Note**: This tool is for educational and personal use only. Please respect privacy and obtain consent before analyzing shared conversations.
-
-[![Made with Python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white)](https://streamlit.io/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+Not affiliated with WhatsApp or Meta. No licence file is included in this
+repository; contact the author about reuse.

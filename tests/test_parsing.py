@@ -311,3 +311,18 @@ def test_read_upload_zip_bomb_guard(monkeypatch):
 def test_read_upload_zip_without_text():
     with pytest.raises(ParseError, match="does not contain"):
         read_upload(_zip({"a.jpg": b"\xff"}), "c.zip")
+
+
+def test_timestamp_like_text_inside_message_keeps_alignment():
+    # The original parser crashed here ("All arrays must be of the same length").
+    chat = (
+        "1/5/24, 9:01 AM - Alice: meet at 1/6/24, 10:00 AM ok?\n"
+        "1/5/24, 9:02 AM - Bob: sure\n"
+        "see 1/7/24, 11:00 AM - also fine\n"
+        "1/13/24, 9:03 AM - Alice: done\n"
+    )
+    r = parse_chat(chat)
+    assert list(r.df["sender"]) == ["Alice", "Bob", "Alice"]
+    assert r.df.loc[0, "text"] == "meet at 1/6/24, 10:00 AM ok?"
+    assert r.df.loc[1, "text"] == "sure\nsee 1/7/24, 11:00 AM - also fine"
+    assert r.df.loc[1, "timestamp"] == datetime(2024, 1, 5, 9, 2)
