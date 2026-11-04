@@ -42,6 +42,7 @@ from typing import Literal
 import pandas as pd
 
 from . import config
+from . import text as textlib
 
 DateOrder = Literal["auto", "DMY", "MDY", "YMD"]
 DATE_ORDER_LABELS = {
@@ -123,6 +124,7 @@ _LOCATION_RE = re.compile(r"^(?:live )?location: ", re.IGNORECASE)
 
 MESSAGE_TYPES = ("text", "media", "deleted", "system")
 COLUMNS = ["timestamp", "sender", "message", "text", "message_type", "edited", "line_no"]
+FEATURE_COLUMNS = ["n_words", "n_links", "n_emoji"]  # derived once per upload (0 for non-text rows)
 
 
 class ParseError(ValueError):
@@ -419,6 +421,16 @@ def derive_text(message: str) -> str:
     return text.strip(_DIR_MARKS + " \t\n")
 
 
+def add_text_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Return ``df`` with word/link/emoji counts for text rows (see ``wa_analyzer.text``)."""
+    texts = df["text"].where(df["message_type"] == "text", "").astype(str)
+    return df.assign(
+        n_words=texts.map(textlib.count_words).astype("int64"),
+        n_links=texts.map(textlib.count_links).astype("int64"),
+        n_emoji=texts.map(lambda t: len(textlib.extract_emoji(t))).astype("int64"),
+    )
+
+
 def parse_chat(text: str, date_order: DateOrder = "auto") -> ParseResult:
     """Parse an exported chat. Raises :class:`ParseError` for unusable input."""
     if date_order not in DATE_ORDER_LABELS:
@@ -447,7 +459,9 @@ def parse_chat(text: str, date_order: DateOrder = "auto") -> ParseResult:
 
     styles = Counter(r.style for r in records)
     style = styles.most_common(1)[0][0]
-    report.style = "iOS-style [date, time]" if style == "ios" else "Android-style date, time -"
+    report.style = (
+        "iOS style ([date, time] Name: text)" if style == "ios" else "Android style (date, time - Name: text)"
+    )
     if len(styles) > 1:
         report.warnings.append("The file mixes Android- and iOS-style lines.")
     has_ampm = sum(1 for r in records if r.ampm)
@@ -497,6 +511,7 @@ def parse_chat(text: str, date_order: DateOrder = "auto") -> ParseResult:
             "(ties keep their original order)."
         )
     df = df.sort_values("timestamp", kind="mergesort").reset_index(drop=True)
+    df = add_text_features(df)
 
     report.messages_parsed = len(df)
     report.type_counts = {t: int((df["message_type"] == t).sum()) for t in MESSAGE_TYPES}

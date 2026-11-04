@@ -1,0 +1,12 @@
+# Optional: message-level sentiment analysis (CPU).
+#
+# Install CPU-only PyTorch FIRST so pip does not pull multi-GB CUDA wheels on Linux:
+#   pip install "torch>=2.13,<3" --index-url https://download.pytorch.org/whl/cpu
+# then:
+#   pip install -r requirements.txt -r requirements-ml.txt
+#
+# The model (cardiffnlp/twitter-xlm-roberta-base-sentiment, ~1.1 GB) is downloaded
+# from huggingface.co on first use and cached in ~/.cache/huggingface.
+torch>=2.13,<3  # >=2.13 includes fixes for advisories affecting the previously pinned 2.7.1
+transformers>=5.10,<6  # >=5.10 fixes advisories present in the previously pinned 4.53.2
+sentencepiece>=0.2.1,<0.3

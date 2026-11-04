@@ -74,6 +74,22 @@ def user_messages(df: pd.DataFrame) -> pd.DataFrame:
     return df[df["message_type"].isin(USER_TYPES)]
 
 
+def _features(df: pd.DataFrame) -> pd.DataFrame:
+    """Word/link/emoji counts per row (precomputed by the parser when available)."""
+    if all(c in df.columns for c in ("n_words", "n_links", "n_emoji")):
+        return df[["n_words", "n_links", "n_emoji"]]
+    texts = df["text"].where(df["message_type"] == "text", "").astype(str)
+    return pd.DataFrame(
+        {
+            "n_words": texts.map(textlib.count_words),
+            "n_links": texts.map(textlib.count_links),
+            "n_emoji": texts.map(lambda t: len(textlib.extract_emoji(t))),
+        },
+        index=df.index,
+        dtype="int64",
+    )
+
+
 def participants(df: pd.DataFrame) -> list[str]:
     """Participants ordered by message count (desc), then name."""
     msgs = user_messages(df)
@@ -110,7 +126,7 @@ def apply_filters(df: pd.DataFrame, filters: Filters) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 def overview(df: pd.DataFrame) -> Overview:
     msgs = user_messages(df)
-    texts = msgs.loc[msgs["message_type"] == "text", "text"]
+    feats = _features(msgs)
     n = len(msgs)
     if n:
         first = msgs["timestamp"].min().to_pydatetime()
@@ -126,9 +142,9 @@ def overview(df: pd.DataFrame) -> Overview:
         media_messages=int((msgs["message_type"] == "media").sum()),
         deleted_messages=int((msgs["message_type"] == "deleted").sum()),
         system_events=int((df["message_type"] == "system").sum()),
-        words=int(sum(textlib.count_words(t) for t in texts)),
-        links=int(sum(textlib.count_links(t) for t in texts)),
-        emoji=int(sum(len(textlib.extract_emoji(t)) for t in texts)),
+        words=int(feats["n_words"].sum()),
+        links=int(feats["n_links"].sum()),
+        emoji=int(feats["n_emoji"].sum()),
         participants=int(msgs["sender"].nunique()),
         first_message=first,
         last_message=last,
@@ -147,16 +163,16 @@ def participant_summary(df: pd.DataFrame) -> pd.DataFrame:
     if msgs.empty:
         return pd.DataFrame(columns=PARTICIPANT_COLUMNS)
     is_text = msgs["message_type"] == "text"
-    text_series = msgs["text"].where(is_text, "")
+    feats = _features(msgs)
     frame = pd.DataFrame(
         {
             "participant": msgs["sender"].astype(str),
             "text": is_text.astype(int),
             "media": (msgs["message_type"] == "media").astype(int),
             "deleted": (msgs["message_type"] == "deleted").astype(int),
-            "words": text_series.map(textlib.count_words),
-            "links": text_series.map(textlib.count_links),
-            "emoji": text_series.map(lambda t: len(textlib.extract_emoji(t))),
+            "words": feats["n_words"],
+            "links": feats["n_links"],
+            "emoji": feats["n_emoji"],
         }
     )
     out = frame.groupby("participant", sort=False).sum().reset_index()
@@ -401,7 +417,8 @@ def word_frequencies(df: pd.DataFrame, max_words: int = 150) -> dict[str, int]:
 
 
 def top_emoji(df: pd.DataFrame, n: int = 15) -> pd.DataFrame:
-    counter = textlib.emoji_counter(_text_series(df))
+    rows = df[_features(df)["n_emoji"] > 0]
+    counter = textlib.emoji_counter(_text_series(rows))
     return pd.DataFrame(counter.most_common(n), columns=["emoji", "count"])
 
 

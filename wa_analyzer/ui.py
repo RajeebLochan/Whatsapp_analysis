@@ -517,7 +517,8 @@ def activity_tab(
 
 
 def words_tab(base_key: tuple, filtered: pd.DataFrame) -> None:
-    words = memo(base_key + ("words",), lambda: analytics.top_words(filtered, n=20))
+    freqs = memo(base_key + ("freqs",), lambda: analytics.word_frequencies(filtered))
+    words = pd.DataFrame(list(freqs.items())[:20], columns=["word", "count"])  # same counts as the word cloud
     emo = memo(base_key + ("emoji",), lambda: analytics.top_emoji(filtered, n=15))
     left, right = st.columns(2)
     with left, safe_section("words"):
@@ -539,7 +540,6 @@ def words_tab(base_key: tuple, filtered: pd.DataFrame) -> None:
             )
             st.caption("Each full emoji sequence counts once (e.g. 👍🏽, 🇮🇳, 👨‍👩‍👧).")
     with safe_section("word cloud"):
-        freqs = memo(base_key + ("freqs",), lambda: analytics.word_frequencies(filtered))
         if freqs and st.toggle("Show word cloud", key="wa_show_wc"):
             img = memo(base_key + ("wordcloud",), lambda: _word_cloud_image(freqs))
             if img is None:

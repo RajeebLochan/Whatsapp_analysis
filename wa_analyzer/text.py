@@ -17,6 +17,7 @@ correctly but their function words are not filtered.
 from __future__ import annotations
 
 import re
+import string
 import unicodedata
 from collections import Counter
 from collections.abc import Iterable
@@ -232,18 +233,25 @@ def _strip_edges(token: str) -> str:
     return token[start:end]
 
 
-def _has_alnum(token: str) -> bool:
-    return any(unicodedata.category(ch)[0] in "LN" for ch in token)
-
-
 def count_links(text: str) -> int:
     return len(URL_RE.findall(text or ""))
+
+
+_WORD_TOKEN_RE = re.compile(r"\S*?[^\W_]\S*")  # a whitespace token containing a letter or digit
+_ASCII_PUNCT = string.punctuation
+
+
+def _drop_links(text: str) -> str:
+    lowered = text.lower()
+    if "http" in lowered or "www." in lowered:
+        return URL_RE.sub(" ", text)
+    return text
 
 
 def count_words(text: str) -> int:
     if not text:
         return 0
-    return sum(1 for tok in URL_RE.sub(" ", text).split() if _has_alnum(tok))
+    return len(_WORD_TOKEN_RE.findall(_drop_links(text)))
 
 
 def tokenize(text: str) -> list[str]:
@@ -255,15 +263,26 @@ def tokenize(text: str) -> list[str]:
     if not text:
         return []
     out: list[str] = []
-    for raw in URL_RE.sub(" ", text).split():
+    for raw in _drop_links(text).split():
+        if raw.isascii():  # fast path for the common case
+            tok = raw.strip(_ASCII_PUNCT).lower()
+            if tok and any(ch.isalpha() for ch in tok):
+                out.append(tok)
+            continue
         tok = _strip_edges(raw).casefold()
         if tok and any(unicodedata.category(ch)[0] == "L" for ch in tok):
             out.append(tok)
     return out
 
 
+# Code points that can start or form an emoji sequence (superset; exact matching is
+# done by the ``emoji`` package). Lets text without emoji, e.g. Hindi or Gujarati
+# script, skip the slower full scan.
+_EMOJI_CANDIDATE_RE = re.compile("[\u00a9\u00ae\u203c-\u3299\U0001f000-\U0001faff\U000e0020-\U000e007f\ufe0f]")
+
+
 def extract_emoji(text: str) -> list[str]:
-    if not text:
+    if not text or text.isascii() or not _EMOJI_CANDIDATE_RE.search(text):
         return []
     return [e["emoji"] for e in emoji_lib.emoji_list(text) if e["emoji"] not in _EXCLUDED_EMOJI]
 

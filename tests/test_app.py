@@ -20,9 +20,7 @@ REPO = Path(__file__).resolve().parents[1]
 
 CHAT_A = "13/01/2024, 09:00 - Alice: hello from chat A\n13/01/2024, 09:05 - Bob: reply A\n"
 CHAT_B = (  # same participants and filename, different content
-    "13/01/2024, 09:00 - Alice: hello from chat B\n"
-    "13/01/2024, 09:05 - Bob: reply B\n"
-    "14/01/2024, 10:00 - Bob: another\n"
+    "13/01/2024, 09:00 - Alice: hello from chat B\n13/01/2024, 09:05 - Bob: reply B\n14/01/2024, 10:00 - Bob: another\n"
 )
 AMBIGUOUS = "01/02/2024, 09:00 - Alice: a\n03/04/2024, 09:00 - Bob: b\n"
 
