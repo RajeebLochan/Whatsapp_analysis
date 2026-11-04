@@ -1,0 +1,33 @@
+# Secrets — never commit real credentials
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# Runtime data — uploaded chats must never be written to or committed from the app directory
+*.db
+*.sqlite
+*.sqlite3
+uploads/
+exports/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Local test artefacts
+tests/browser/artifacts/

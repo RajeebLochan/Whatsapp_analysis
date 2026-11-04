@@ -1,6 +1,5 @@
 from wordcloud import WordCloud
 import streamlit as st
-import sqlite3
 import matplotlib.pyplot as plt
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
 import pandas as pd
@@ -17,31 +16,6 @@ import os
 from dotenv import load_dotenv
 from together import Together
 
-# === Initialize Database ===
-def init_db():
-    conn = sqlite3.connect("uploaded_files.db")
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS files (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            filename TEXT,
-            content TEXT
-        )
-    """)
-    conn.commit()
-    conn.close()
-
-def save_to_db(filename, content):
-    conn = sqlite3.connect("uploaded_files.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(*) FROM files WHERE filename = ?", (filename,))
-    exists = cursor.fetchone()[0]
-    if exists == 0:
-        cursor.execute("INSERT INTO files (filename, content) VALUES (?, ?)", (filename, content))
-        conn.commit()
-    conn.close()
-
-init_db()
 
 # === Streamlit Config ===
 # Page configuration
@@ -197,7 +171,6 @@ if uploaded_file:
     </div>
     """, unsafe_allow_html=True)
     
-    save_to_db(uploaded_file.name, data)
 
     df = preprocess(data)
     
