@@ -48,10 +48,14 @@ def df():
 
 def test_normalize_label_map_variants():
     assert se.normalize_label_map({"0": "negative", "1": "neutral", "2": "positive"}) == {
-        0: "negative", 1: "neutral", 2: "positive",
+        0: "negative",
+        1: "neutral",
+        2: "positive",
     }
     assert se.normalize_label_map({0: "LABEL_0", 1: "LABEL_1", 2: "LABEL_2"}) == {
-        0: "negative", 1: "neutral", 2: "positive",
+        0: "negative",
+        1: "neutral",
+        2: "positive",
     }
     with pytest.raises(se.SentimentError):
         se.normalize_label_map({0: "joy", 1: "anger"})
@@ -79,7 +83,7 @@ def test_row_alignment_with_skips_and_failures(df):
     run = se.analyse(df, model, batch_size=8)
     r = run.results
     assert list(r.index) == list(df.index)
-    by_text = dict(zip(df["text"], r["status"]))
+    by_text = dict(zip(df["text"], r["status"], strict=True))
     assert by_text["<Media omitted>"] == "skipped"
     assert by_text["Messages and calls are end-to-end encrypted."] == "skipped"
     assert by_text["FAIL please"] == "error"

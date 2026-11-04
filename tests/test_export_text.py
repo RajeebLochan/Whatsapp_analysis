@@ -19,7 +19,7 @@ from wa_analyzer.sample import SAMPLE_CHAT
 @pytest.mark.parametrize(
     "value,expected",
     [
-        ("=HYPERLINK(\"http://x\")", "'=HYPERLINK(\"http://x\")"),
+        ('=HYPERLINK("http://x")', '\'=HYPERLINK("http://x")'),
         ("+1 555 0100", "'+1 555 0100"),
         ("-2+3", "'-2+3"),
         ("@SUM(A1)", "'@SUM(A1)"),
@@ -50,7 +50,9 @@ def test_export_zip_and_report_exclude_message_text():
     ov = an.overview(df)
     parts = an.participant_summary(df)
     report = ex.build_report(result.report, ov, parts, "All participants, all dates")
-    data = ex.build_zip({"overview": ex.overview_table(ov), "participants": parts, "daily": an.daily_counts(df)}, report)
+    data = ex.build_zip(
+        {"overview": ex.overview_table(ov), "participants": parts, "daily": an.daily_counts(df)}, report
+    )
     with zipfile.ZipFile(io.BytesIO(data)) as zf:
         names = set(zf.namelist())
         blob = b"".join(zf.read(n) for n in names).decode("utf-8-sig", errors="replace")

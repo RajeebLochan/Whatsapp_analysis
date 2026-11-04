@@ -165,7 +165,11 @@ def test_non_retryable_errors(status, body, kind):
 
 def test_rate_limit_retries_then_succeeds_with_retry_after():
     c, session, sleeps = client(
-        [FakeResponse(status=429, headers={"Retry-After": "3"}), FakeResponse(status=503), FakeResponse(lines=sse("ok"))]
+        [
+            FakeResponse(status=429, headers={"Retry-After": "3"}),
+            FakeResponse(status=503),
+            FakeResponse(lines=sse("ok")),
+        ]
     )
     assert c.complete("m", [], 10, deadline=1e12) == "ok"
     assert len(session.calls) == 3
@@ -225,7 +229,9 @@ def test_deadline_stops_request():
 # ---------------------------------------------------------------------------
 def test_summarize_map_reduce_counts_requests_and_respects_budget():
     plan = ai.ChunkPlan(chunks=["c1", "c2"], lines_included=2, lines_omitted=0, estimated_input_tokens=2)
-    c, session, _ = client([FakeResponse(lines=sse("p1")), FakeResponse(lines=sse("p2")), FakeResponse(lines=sse("final"))])
+    c, session, _ = client(
+        [FakeResponse(lines=sse("p1")), FakeResponse(lines=sse("p2")), FakeResponse(lines=sse("final"))]
+    )
     counted = []
     result = ai.summarize(c, "m", plan, on_request=lambda: counted.append(1))
     assert result.text == "final" and result.requests_made == 3 and len(counted) == 3

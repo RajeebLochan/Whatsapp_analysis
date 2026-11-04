@@ -60,9 +60,7 @@ _TIME = (
     r"(?P<h>\d{1,2})[:.](?P<mi>\d{2})(?:[:.](?P<s>\d{2}))?"
     rf"(?:{_SP}*{_DIR_CLASS}*(?P<ampm>[AaPp]\.?{_SP}?[Mm]\.?))?"
 )
-_ANDROID_RE = re.compile(
-    rf"^{_DIR_CLASS}*{_DATE},?{_SP}+{_DIR_CLASS}*{_TIME}{_DIR_CLASS}*{_SP}*[-–]{_SP}(?P<rest>.*)$"
-)
+_ANDROID_RE = re.compile(rf"^{_DIR_CLASS}*{_DATE},?{_SP}+{_DIR_CLASS}*{_TIME}{_DIR_CLASS}*{_SP}*[-–]{_SP}(?P<rest>.*)$")
 _IOS_RE = re.compile(
     rf"^{_DIR_CLASS}*\[{_DATE},?{_SP}+{_DIR_CLASS}*{_TIME}{_DIR_CLASS}*\]{_SP}*{_DIR_CLASS}*(?P<rest>.*)$"
 )
@@ -71,13 +69,33 @@ _LINE_SPLIT_RE = re.compile(r"\r\n|\r|\n")  # NOT str.splitlines(): keeps U+2028
 # System events (English exports). Anchored to the start of the record and
 # never allowed to cross a ':' so "Bob: I added you" is not a system event.
 _SYSTEM_PHRASES = (
-    r"added", r"removed", r"left", r"joined using this group's invite link", r"joined",
-    r"created group", r"created this group", r"changed the subject", r"changed this group's",
-    r"changed the group", r"changed their phone number", r"changed to \+?\d", r"deleted this group's",
-    r"was added", r"was removed", r"pinned a message", r"turned on disappearing messages",
-    r"turned off disappearing messages", r"changed the settings", r"reset this group's invite link",
-    r"started a call", r"is now an admin", r"are now an admin", r"now an admin",
-    r"requested to join", r"blocked this contact", r"unblocked this contact",
+    r"added",
+    r"removed",
+    r"left",
+    r"joined using this group's invite link",
+    r"joined",
+    r"created group",
+    r"created this group",
+    r"changed the subject",
+    r"changed this group's",
+    r"changed the group",
+    r"changed their phone number",
+    r"changed to \+?\d",
+    r"deleted this group's",
+    r"was added",
+    r"was removed",
+    r"pinned a message",
+    r"turned on disappearing messages",
+    r"turned off disappearing messages",
+    r"changed the settings",
+    r"reset this group's invite link",
+    r"started a call",
+    r"is now an admin",
+    r"are now an admin",
+    r"now an admin",
+    r"requested to join",
+    r"blocked this contact",
+    r"unblocked this contact",
 )
 _SYSTEM_RE = re.compile(
     r"^(?:"
@@ -99,9 +117,7 @@ _MEDIA_RE = re.compile(
     r"|.+ \(file attached\)|.+ document omitted|view once (?:photo|video|voice message))$",
     re.IGNORECASE | re.DOTALL,
 )
-_DELETED_RE = re.compile(
-    r"^(?:this message was deleted|you deleted this message)(?: by .+)?\.?$", re.IGNORECASE
-)
+_DELETED_RE = re.compile(r"^(?:this message was deleted|you deleted this message)(?: by .+)?\.?$", re.IGNORECASE)
 _EDITED_RE = re.compile(r"\s*<this message was edited>\s*$", re.IGNORECASE)
 _LOCATION_RE = re.compile(r"^(?:live )?location: ", re.IGNORECASE)
 
@@ -208,9 +224,7 @@ def read_upload(data: bytes, filename: str = "") -> tuple[str, list[str]]:
     except UnicodeDecodeError:
         text = data.decode("utf-8", errors="replace").lstrip("﻿")
         bad = text.count("�")
-        warnings.append(
-            f"The file is not valid UTF-8; {bad} undecodable byte sequence(s) were replaced with '�'."
-        )
+        warnings.append(f"The file is not valid UTF-8; {bad} undecodable byte sequence(s) were replaced with '�'.")
         return text, warnings
 
 
@@ -417,7 +431,9 @@ def parse_chat(text: str, date_order: DateOrder = "auto") -> ParseResult:
         lines.pop()
     report.total_lines = len(lines)
     if report.total_lines > config.MAX_LINE_COUNT:
-        raise ParseError(f"The export has more than {config.MAX_LINE_COUNT:,} lines, which exceeds the processing limit.")
+        raise ParseError(
+            f"The export has more than {config.MAX_LINE_COUNT:,} lines, which exceeds the processing limit."
+        )
 
     records = _collect_records(lines, report)
     report.records_found = len(records)
@@ -427,9 +443,7 @@ def parse_chat(text: str, date_order: DateOrder = "auto") -> ParseResult:
             "'date, time - Name: message' and iOS-style '[date, time] Name: message' exports."
         )
     if report.preamble_lines:
-        report.warnings.append(
-            f"{report.preamble_lines} line(s) before the first timestamp were ignored."
-        )
+        report.warnings.append(f"{report.preamble_lines} line(s) before the first timestamp were ignored.")
 
     styles = Counter(r.style for r in records)
     style = styles.most_common(1)[0][0]
@@ -461,13 +475,10 @@ def parse_chat(text: str, date_order: DateOrder = "auto") -> ParseResult:
 
     if not rows:
         raise ParseError(
-            "Timestamps were found but none could be read with the selected date order. "
-            "Try a different date order."
+            "Timestamps were found but none could be read with the selected date order. Try a different date order."
         )
     if report.skipped_records:
-        report.warnings.append(
-            f"{report.skipped_records} record(s) were skipped because their timestamp was invalid."
-        )
+        report.warnings.append(f"{report.skipped_records} record(s) were skipped because their timestamp was invalid.")
     if len(rows) > config.MAX_MESSAGES:
         report.truncated = len(rows) - config.MAX_MESSAGES
         rows = rows[-config.MAX_MESSAGES :]

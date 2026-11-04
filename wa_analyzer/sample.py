@@ -42,10 +42,35 @@ Bring water and snacks.
 """
 
 _NAMES = ["Asha", "Bruno", "Chen Wei", "Dana", "+1 555 0100", "Élodie", "Ravi Kumar", "Søren"]
-_WORDS = (
-    "hike plan meeting lunch train bus coffee tomorrow today weekend photos park lake trail "
-    "running late okay sure thanks please great idea check tickets weather sunny rain"
-).split()
+_WORDS = [
+    "hike",
+    "plan",
+    "meeting",
+    "lunch",
+    "train",
+    "bus",
+    "coffee",
+    "tomorrow",
+    "today",
+    "weekend",
+    "photos",
+    "park",
+    "lake",
+    "trail",
+    "running",
+    "late",
+    "okay",
+    "sure",
+    "thanks",
+    "please",
+    "great",
+    "idea",
+    "check",
+    "tickets",
+    "weather",
+    "sunny",
+    "rain",
+]
 _EMOJI = ["😀", "👍🏽", "🎉", "🇮🇳", "👨‍👩‍👧", "❤️", "😂", "🙏🏾"]
 
 
@@ -58,7 +83,7 @@ def generate_chat(
     start: datetime = datetime(2022, 1, 1, 8, 0),
 ) -> str:
     """Generate a deterministic synthetic export with ``n_messages`` records."""
-    rng = random.Random(seed)
+    rng = random.Random(seed)  # noqa: S311 - deterministic synthetic data, not security
     names = _NAMES[: max(1, min(participants, len(_NAMES)))]
     ts = start
     lines: list[str] = []

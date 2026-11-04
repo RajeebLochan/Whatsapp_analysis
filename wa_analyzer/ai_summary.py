@@ -108,7 +108,7 @@ def build_transcript(df: pd.DataFrame, *, pseudonymize: bool = True, redact: boo
     patterns = _name_patterns(mapping) if pseudonymize else []
     lines: list[str] = []
     media = 0
-    for ts, sender, mtype, text in zip(msgs["timestamp"], senders, msgs["message_type"], msgs["text"]):
+    for ts, sender, mtype, text in zip(msgs["timestamp"], senders, msgs["message_type"], msgs["text"], strict=True):
         label = mapping.get(sender, sender)
         if mtype == "media":
             media += 1
@@ -247,9 +247,7 @@ class TogetherClient:
             if self._clock() >= deadline:
                 raise ProviderError("timeout", "The AI request took too long and was stopped.")
             try:
-                resp = self._session.post(
-                    self._url, headers=headers, json=payload, stream=True, timeout=self._timeouts
-                )
+                resp = self._session.post(self._url, headers=headers, json=payload, stream=True, timeout=self._timeouts)
             except requests.Timeout:
                 err = ProviderError("timeout", "The AI provider did not respond in time.")
             except requests.ConnectionError:
@@ -292,7 +290,7 @@ class TogetherClient:
         except Exception:  # noqa: BLE001 - body is optional diagnostic data
             detail = ""
         if status in (401, 403):
-            return ProviderError("auth", "The AI provider rejected the API key (HTTP %d)." % status)
+            return ProviderError("auth", f"The AI provider rejected the API key (HTTP {status}).")
         if status == 404 or (status == 400 and "model" in detail):
             return ProviderError(
                 "model",
@@ -302,8 +300,8 @@ class TogetherClient:
         if status == 429:
             return ProviderError("rate_limit", "The AI provider's rate limit or quota was reached. Try again later.")
         if status >= 500:
-            return ProviderError("server", "The AI provider had a server error (HTTP %d)." % status)
-        return ProviderError("bad_request", "The AI provider rejected the request (HTTP %d)." % status)
+            return ProviderError("server", f"The AI provider had a server error (HTTP {status}).")
+        return ProviderError("bad_request", f"The AI provider rejected the request (HTTP {status}).")
 
     def _read_stream(self, resp: object, deadline: float, max_tokens: int) -> str:
         import requests

@@ -181,7 +181,7 @@ def analyse(
             store(batch_idx, model.predict_proba(texts))
         except Exception as exc:  # noqa: BLE001 - isolate model failures per item
             logger.warning("Sentiment batch failed (%s); retrying items individually", type(exc).__name__)
-            for one_idx, one_text in zip(batch_idx, texts):
+            for one_idx, one_text in zip(batch_idx, texts, strict=True):
                 try:
                     store([one_idx], model.predict_proba([one_text]))
                 except Exception as item_exc:  # noqa: BLE001

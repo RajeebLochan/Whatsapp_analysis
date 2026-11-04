@@ -89,7 +89,12 @@ def test_monthly_and_weekly_are_year_aware_and_chronological():
     assert monthly["label"].tolist()[:3] == ["2023-12", "2024-01", "2024-02"]
     assert monthly["label"].tolist()[-1] == "2024-12"
     assert len(monthly) == 13
-    assert monthly.set_index("label").loc[["2023-12", "2024-01", "2024-02", "2024-12"], "messages"].tolist() == [1, 0, 2, 1]
+    assert monthly.set_index("label").loc[["2023-12", "2024-01", "2024-02", "2024-12"], "messages"].tolist() == [
+        1,
+        0,
+        2,
+        1,
+    ]
     weekly = an.weekly_counts(df)
     assert weekly["week_start"].is_monotonic_increasing
     assert weekly["messages"].sum() == 4
@@ -124,7 +129,7 @@ def test_sessions_idle_rule(df):
     assert sess["starter"].tolist() == ["A", "C", "B"]
     assert sess["messages"].tolist() == [4, 2, 1]
     assert sess["duration_min"].tolist() == [45.0, 30.0, 0.0]
-    assert dict(zip(starters["participant"], starters["sessions_started"])) == {"A": 1, "B": 1, "C": 1}
+    assert dict(zip(starters["participant"], starters["sessions_started"], strict=True)) == {"A": 1, "B": 1, "C": 1}
     # A larger idle threshold merges the 90-minute gap.
     sess3h, _ = an.sessions(df, ALL, idle_minutes=180)
     assert sess3h["messages"].tolist() == [4, 3]
@@ -161,7 +166,7 @@ def test_words_and_emoji(df):
     words = an.top_words(df)
     assert set(words["word"]) == {"hello", "hi", "back", "late"}  # 'there', 'ok', 'again' are stop words
     emo = an.top_emoji(df)
-    assert dict(zip(emo["emoji"], emo["count"])) == {"👍🏽": 2, "😀": 1, "🇮🇳": 1}
+    assert dict(zip(emo["emoji"], emo["count"], strict=True)) == {"👍🏽": 2, "😀": 1, "🇮🇳": 1}
 
 
 def test_functions_do_not_mutate_input(df):

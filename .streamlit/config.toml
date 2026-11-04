@@ -1,0 +1,26 @@
+# Streamlit server configuration (committed; contains no secrets).
+# Secrets go in .streamlit/secrets.toml (git-ignored) or the hosting dashboard.
+
+[server]
+# Matches wa_analyzer.config.MAX_UPLOAD_MB; the app also enforces it in code.
+maxUploadSize = 20
+enableXsrfProtection = true
+enableCORS = true
+
+[browser]
+# Do not send usage statistics to Streamlit.
+gatherUsageStats = false
+
+[client]
+# Show only generic messages for unexpected errors (details go to server logs).
+showErrorDetails = "none"
+toolbarMode = "viewer"
+
+[runner]
+magicEnabled = false
+
+[theme.light]
+primaryColor = "#0F7B5C"   # 5.2:1 against white
+
+[theme.dark]
+primaryColor = "#1A8F68"   # 4.7:1 against Streamlit's dark background

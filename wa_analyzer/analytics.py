@@ -186,7 +186,11 @@ def monthly_counts(df: pd.DataFrame) -> pd.DataFrame:
     msgs = user_messages(df)
     if msgs.empty:
         return pd.DataFrame(
-            {"month": pd.Series(dtype="datetime64[ns]"), "label": pd.Series(dtype=object), "messages": pd.Series(dtype="int64")}
+            {
+                "month": pd.Series(dtype="datetime64[ns]"),
+                "label": pd.Series(dtype=object),
+                "messages": pd.Series(dtype="int64"),
+            }
         )
     periods = msgs["timestamp"].dt.to_period("M")
     counts = periods.value_counts()
@@ -268,8 +272,12 @@ def _in_range(ts: pd.Series, filters: Filters) -> pd.Series:
 
 
 RESPONSE_COLUMNS = [
-    "participant", "reply_gaps_counted", "median_reply_gap_min", "mean_reply_gap_min",
-    "followups_counted", "median_followup_gap_min",
+    "participant",
+    "reply_gaps_counted",
+    "median_reply_gap_min",
+    "mean_reply_gap_min",
+    "followups_counted",
+    "median_followup_gap_min",
 ]
 
 

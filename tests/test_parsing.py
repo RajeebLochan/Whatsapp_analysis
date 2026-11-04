@@ -19,7 +19,7 @@ LRM = "‎"
 def _rows(result):
     df = result.df
     senders = [None if pd.isna(s) else s for s in df["sender"]]
-    return list(zip(df["timestamp"].dt.to_pydatetime(), senders, df["text"], df["message_type"]))
+    return list(zip(df["timestamp"].dt.to_pydatetime(), senders, df["text"], df["message_type"], strict=True))
 
 
 # ---------------------------------------------------------------------------
@@ -155,7 +155,16 @@ def test_system_media_deleted_edited_classification():
     )
     r = parse_chat(chat)
     assert list(r.df["message_type"]) == [
-        "system", "system", "system", "text", "media", "deleted", "deleted", "text", "media", "system",
+        "system",
+        "system",
+        "system",
+        "text",
+        "media",
+        "deleted",
+        "deleted",
+        "text",
+        "media",
+        "system",
     ]
     assert r.df.loc[3, "sender"] == "Bob"
     assert r.df.loc[7, "text"] == "fixed typo"
@@ -216,11 +225,7 @@ def test_no_timezone_is_invented():
 # Ordering
 # ---------------------------------------------------------------------------
 def test_stable_chronological_sort_keeps_ties_in_file_order():
-    chat = (
-        "05/01/2024, 09:05 - A: third\n"
-        "05/01/2024, 09:00 - B: first\n"
-        "05/01/2024, 09:00 - C: second (tie)\n"
-    )
+    chat = "05/01/2024, 09:05 - A: third\n05/01/2024, 09:00 - B: first\n05/01/2024, 09:00 - C: second (tie)\n"
     r = parse_chat(chat)
     assert list(r.df["text"]) == ["first", "second (tie)", "third"]
     assert r.report.out_of_order == 1
@@ -290,7 +295,7 @@ def _zip(members: dict[str, bytes]) -> bytes:
 
 
 def test_read_upload_zip_prefers_chat_txt():
-    data = _zip({"IMG-1.jpg": b"\xff\xd8", "_chat.txt": "[05/01/2024, 09:00:00] A: hi\n".encode()})
+    data = _zip({"IMG-1.jpg": b"\xff\xd8", "_chat.txt": b"[05/01/2024, 09:00:00] A: hi\n"})
     text, _ = read_upload(data, "WhatsApp Chat.zip")
     assert parse_chat(text).df.loc[0, "sender"] == "A"
 

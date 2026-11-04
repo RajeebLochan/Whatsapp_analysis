@@ -1,0 +1,33 @@
+[project]
+name = "whatsapp-chat-analyzer"
+version = "2.0.0"
+description = "Privacy-conscious Streamlit analyzer for exported WhatsApp chats"
+readme = "README.md"
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+extend-exclude = ["tests/browser/artifacts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "BLE", "S", "SIM"]
+ignore = [
+    "S101",   # assert is fine in tests
+    "E501",   # long UI strings are wrapped by the formatter where practical
+    "B008",
+    "SIM117", # nested with-blocks mirror Streamlit layout
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "BLE"]
+"scripts/**" = ["S"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = [
+    "browser: end-to-end check in a real browser (needs Playwright; skipped otherwise)",
+    "real_model: downloads and runs the real sentiment model (needs network + requirements-ml.txt)",
+]
+filterwarnings = ["error::FutureWarning:wa_analyzer.*"]
