@@ -367,3 +367,12 @@ def test_sentiment_model_failure_is_contained(monkeypatch):
     click(at, "Run sentiment analysis")
     assert any("could not be downloaded" in e.value for e in at.error)
     assert metric(at, "Messages") == "21"
+
+
+def test_new_upload_resets_explicit_date_order():
+    at = upload(new_app(), AMBIGUOUS)
+    at.radio(key="wa_date_order").set_value("MDY").run()
+    upload(at, CHAT_B)  # 13/01/2024 is impossible as MDY; auto-detection must apply again
+    assert at.radio(key="wa_date_order").value == "auto"
+    assert metric(at, "Messages") == "3"
+    assert not any("skipped" in i.value for i in at.info)

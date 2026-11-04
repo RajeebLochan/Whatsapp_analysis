@@ -94,7 +94,8 @@ def _drop_stale(sha: str) -> None:
         ss["wa_memo"] = OrderedDict()
         ss["wa_sentiment_runs"] = OrderedDict()
         ss["wa_ai_results"] = OrderedDict()
-        for key in [k for k in list(ss.keys()) if str(k).startswith(("wa_parsed", "wa_f_", "wa_ai_consent"))]:
+        stale = ("wa_parsed", "wa_f_", "wa_ai_consent", "wa_date_order")  # a new file starts with auto-detection
+        for key in [k for k in list(ss.keys()) if str(k).startswith(stale)]:
             del ss[key]
     ss["wa_current_sha"] = sha
 

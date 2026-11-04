@@ -10,7 +10,7 @@ All data used in validation is synthetic (`wa_analyzer/sample.py` and inline tes
 |---|---|---|
 | Lint | `ruff check .` | All checks passed (3.11, 3.13) |
 | Format | `ruff format --check .` | 24 files already formatted |
-| Unit + AppTest suite | `python -m pytest -q --ignore=tests/browser` | **111 passed, 1 skipped** on 3.11 and on 3.13 (skip = opt-in real-model test) |
+| Unit + AppTest suite | `python -m pytest -q --ignore=tests/browser` | **112 passed, 1 skipped** on 3.11 and on 3.13 (skip = opt-in real-model test) |
 | Browser smoke test | `python -m pytest -q tests/browser` | **2 passed** (desktop flow + mobile layout) |
 | Dependency consistency | `pip check` / `uv pip check` in clean venvs | All installed packages are compatible (3.11, 3.13) |
 | Dependency resolution | `uv pip compile` of `requirements-dev.txt` and `requirements.txt + requirements-ml.txt` for 3.11/3.13 (manylinux x86_64) | Resolves; ML graph → torch 2.15.0, transformers 5.22.1, tokenizers 0.23.3, sentencepiece 0.2.2, numpy 2.4.6 (3.11) / 2.5.4 (3.13) |
@@ -28,7 +28,7 @@ All data used in validation is synthetic (`wa_analyzer/sample.py` and inline tes
 | `tests/test_export_text.py` | 15 | CSV formula-injection protection, ZIP/report without message text, pseudonyms, word/link/emoji/tokeniser definitions (incl. Devanagari/Gujarati) | none |
 | `tests/test_sentiment.py` | 9 | Label-map normalisation, model-card preprocessing, confident negative stays negative, confidence ≠ polarity, row alignment with skips/failures, per-item retry, message cap, aggregations | fake model |
 | `tests/test_ai_summary.py` | 22 | Pseudonyms/redaction, delimiter neutralisation, bounded chunking, cache keys, request shape (no tools, timeouts), auth/model/400 errors, 429/5xx retries with Retry-After, timeouts, connection errors, interrupted/incomplete streams, empty output, deadline, map-reduce request counting, budget, safe rendering, shared-key default off | fake HTTP session |
-| `tests/test_app.py` | 22 | Streamlit AppTest of the real `app.py`: privacy note, sample and upload flows, malformed/oversize uploads, ambiguous-date choice, filters, upload replacement (same name and people), clear, two-user isolation, no files written, logs without chat content, AI opt-in/consent/click, no repeated requests on unrelated reruns, filtered AI input, missing keys, timeouts, request budget, safe output, sentiment unavailable/lazy/failure | fakes only |
+| `tests/test_app.py` | 23 | Streamlit AppTest of the real `app.py`: privacy note, sample and upload flows, malformed/oversize uploads, ambiguous-date choice (reset on a new upload), filters, upload replacement (same name and people), clear, two-user isolation, no files written, logs without chat content, AI opt-in/consent/click, no repeated requests on unrelated reruns, filtered AI input, missing keys, timeouts, request budget, safe output, sentiment unavailable/lazy/failure | fakes only |
 | `tests/browser/test_browser.py` | 2 | Real Chromium against `streamlit run app.py`: sample flow, Plotly charts render, a heatmap layer is drawn, AI button disabled without consent, clear works, no JS page errors; 390 px mobile viewport has no horizontal overflow and tabs remain reachable | local server only |
 | `tests/test_real_model.py` | 1 | Real model download, label mapping, CPU batch inference, two obvious English sentences on the expected side. **Not an accuracy evaluation.** | needs huggingface.co (skipped here) |
 
