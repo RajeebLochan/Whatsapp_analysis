@@ -24,18 +24,18 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Create and start virtual environment
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-      
       - name: Install dependencies
-        run: pip install -r requirements.txt
-        
-      # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
+        run: pip install -r requirements-dev.txt
 
+      - name: Run tests before packaging
+        run: python -m pytest -q --ignore=tests/browser -m "not real_model"
+
+      # Include .streamlit/config.toml (upload limit, XSRF, error-detail settings);
+      # never package secrets, git metadata, tests or local environments.
       - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+        run: >
+          zip release.zip -r . -x '.git/*' 'venv/*' '.venv/*' 'tests/*' '.env' '.env.*'
+          '.streamlit/secrets.toml' '*__pycache__*' '*.db'
 
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4

@@ -1,0 +1,7 @@
+# Development, tests and audits (no network or model downloads needed for the default suite).
+-r requirements.txt
+pytest==9.2.0
+ruff==0.17.3
+pip-audit==2.10.1
+# Optional real-browser checks (tests/browser): also run `python -m playwright install chromium`.
+playwright==1.64.1

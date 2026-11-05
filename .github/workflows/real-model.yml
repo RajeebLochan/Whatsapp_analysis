@@ -1,0 +1,27 @@
+name: Optional real sentiment model check
+
+# Manual only: downloads CPU PyTorch and the ~1.1 GB Hugging Face model.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-model:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install CPU-only PyTorch and ML extras
+        run: |
+          pip install "torch>=2.13,<3" --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements-dev.txt -r requirements-ml.txt
+          pip check
+      - name: Run real-model sanity checks
+        env:
+          WA_RUN_REAL_MODEL: "1"
+        run: python -m pytest -q -m real_model tests/test_real_model.py
